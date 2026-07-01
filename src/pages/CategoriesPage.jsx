@@ -11,6 +11,7 @@ import Badge from '../components/ui/Badge';
 import Modal from '../components/ui/Modal';
 import { categoriesApi } from '../services/api';
 import { useToast } from '../hooks/useToast.jsx';
+import { usePermission } from '../hooks/usePermission';
 
 const schema = z.object({
   name:        z.string().min(2, 'الاسم الإنجليزي مطلوب'),
@@ -39,6 +40,10 @@ export default function CategoriesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { toast, toasts, ToastContainer } = useToast();
+
+  const canCreate = usePermission('complaints.categories.create');
+  const canUpdate = usePermission('complaints.categories.update');
+  const canDelete = usePermission('complaints.categories.delete');
 
   const isEdit = Boolean(selected && !deleteOpen);
 
@@ -111,10 +116,12 @@ export default function CategoriesPage() {
       {/* رأس الصفحة */}
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-[#0b5248]">الفئات</h2>
-        <Button onClick={openAdd}>
-          <Plus size={16} />
-          إضافة فئة
-        </Button>
+        {canCreate && (
+          <Button onClick={openAdd}>
+            <Plus size={16} />
+            إضافة فئة
+          </Button>
+        )}
       </div>
 
       {/* الجدول */}
@@ -156,20 +163,24 @@ export default function CategoriesPage() {
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => openEdit(cat)}
-                        className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
-                        title="تعديل"
-                      >
-                        <Pencil size={15} />
-                      </button>
-                      <button
-                        onClick={() => openDelete(cat)}
-                        className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                        title="حذف"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          onClick={() => openEdit(cat)}
+                          className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
+                          title="تعديل"
+                        >
+                          <Pencil size={15} />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          onClick={() => openDelete(cat)}
+                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                          title="حذف"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

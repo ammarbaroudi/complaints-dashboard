@@ -84,6 +84,8 @@ api.interceptors.response.use(
 export const authApi = {
   login: (email, password) =>
     api.post('/auth/login', { email, password }).then((r) => r.data),
+  getPermissions: () =>
+    api.get('/auth/permissions').then((r) => r.data),
 };
 
 export const categoriesApi = {

@@ -8,6 +8,7 @@ const useAuthStore = create(
       user: null,
       token: null,
       refreshToken: null,
+      permissions: [],
       isLoading: false,
       error: null,
 
@@ -15,7 +16,13 @@ const useAuthStore = create(
         set({ isLoading: true, error: null });
         try {
           const data = await authApi.login(email, password);
-          set({ token: data.access_token, refreshToken: data.refresh_token, isLoading: false });
+          const perms = (data.permissions || []).map((p) => p.name ?? p);
+          set({
+            token: data.access_token,
+            refreshToken: data.refresh_token,
+            permissions: perms,
+            isLoading: false,
+          });
           return true;
         } catch (err) {
           const msg = err.response?.data?.message || 'بيانات الدخول غير صحيحة';
@@ -24,8 +31,18 @@ const useAuthStore = create(
         }
       },
 
+      fetchPermissions: async () => {
+        try {
+          const data = await authApi.getPermissions();
+          const perms = (data || []).map((p) => p.name ?? p);
+          set({ permissions: perms });
+        } catch {
+          // token expired — interceptor will redirect to /login
+        }
+      },
+
       logout: () => {
-        set({ user: null, token: null, refreshToken: null, error: null });
+        set({ user: null, token: null, refreshToken: null, permissions: [], error: null });
       },
     }),
     {

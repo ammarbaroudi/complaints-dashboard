@@ -11,6 +11,7 @@ import Modal from '../components/ui/Modal';
 import { requestsApi } from '../services/api';
 import { useToast } from '../hooks/useToast.jsx';
 import { cn } from '../utils/cn';
+import { usePermission } from '../hooks/usePermission';
 
 const STATUS_MAP = {
   pending:   { label: 'قيد الانتظار', variant: 'warning' },
@@ -52,6 +53,9 @@ export default function RequestsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { toast, toasts, ToastContainer } = useToast();
+
+  const canRespond = usePermission('complaints.requests.respond');
+  const canDelete  = usePermission('complaints.requests.delete');
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(respondSchema),
@@ -217,20 +221,24 @@ export default function RequestsPage() {
                       </td>
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-1.5">
-                          <button
-                            onClick={() => openRespond(req)}
-                            className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
-                            title="الرد"
-                          >
-                            <MessageSquare size={15} />
-                          </button>
-                          <button
-                            onClick={() => openDelete(req)}
-                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                            title="حذف"
-                          >
-                            <Trash2 size={15} />
-                          </button>
+                          {canRespond && (
+                            <button
+                              onClick={() => openRespond(req)}
+                              className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
+                              title="الرد"
+                            >
+                              <MessageSquare size={15} />
+                            </button>
+                          )}
+                          {canDelete && (
+                            <button
+                              onClick={() => openDelete(req)}
+                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                              title="حذف"
+                            >
+                              <Trash2 size={15} />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>

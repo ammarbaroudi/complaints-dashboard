@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import CategoriesPage from './pages/CategoriesPage';
@@ -11,6 +12,13 @@ function ProtectedRoute({ children }) {
 }
 
 export default function App() {
+  const token = useAuthStore((s) => s.token);
+  const fetchPermissions = useAuthStore((s) => s.fetchPermissions);
+
+  useEffect(() => {
+    if (token) fetchPermissions();
+  }, [token]);
+
   return (
     <BrowserRouter>
       <Routes>
