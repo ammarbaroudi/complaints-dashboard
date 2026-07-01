@@ -64,6 +64,12 @@ api.interceptors.response.use(
         if (data.refresh_token) stored.state.refreshToken = data.refresh_token;
         localStorage.setItem('complaints-auth', JSON.stringify(stored));
 
+        if (data.permissions) {
+          const { default: useAuthStore } = await import('../store/authStore');
+          const perms = data.permissions.map((p) => p.name ?? p);
+          useAuthStore.setState({ permissions: perms });
+        }
+
         original.headers.Authorization = `Bearer ${newToken}`;
         processQueue(null, newToken);
         return api(original);

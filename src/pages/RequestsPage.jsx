@@ -56,6 +56,7 @@ export default function RequestsPage() {
 
   const canRespond = usePermission('complaints.requests.respond');
   const canDelete  = usePermission('complaints.requests.delete');
+  const canAct = canRespond || canDelete;
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: zodResolver(respondSchema),
@@ -168,7 +169,7 @@ export default function RequestsPage() {
                 <th className="px-3 py-3 text-start font-medium">الوصف</th>
                 <th className="px-3 py-3 text-start font-medium">الحالة</th>
                 <th className="px-3 py-3 text-start font-medium">التاريخ</th>
-                <th className="px-3 py-3 text-start font-medium">الإجراءات</th>
+                {canAct && <th className="px-3 py-3 text-start font-medium">الإجراءات</th>}
               </tr>
             </thead>
             <tbody>
@@ -176,7 +177,7 @@ export default function RequestsPage() {
                 Array.from({ length: 5 }).map((_, i) => <SkeletonRow key={i} />)
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-16 text-center text-[#60706d]">
+                  <td colSpan={canAct ? 9 : 8} className="px-4 py-16 text-center text-[#60706d]">
                     <MessageSquare size={40} className="mx-auto mb-2 opacity-30" />
                     {requests.length === 0
                       ? 'لا توجد شكاوي بعد'
@@ -219,28 +220,30 @@ export default function RequestsPage() {
                           ? new Date(req.createdAt).toLocaleDateString('ar-SA')
                           : '—'}
                       </td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-1.5">
-                          {canRespond && (
-                            <button
-                              onClick={() => openRespond(req)}
-                              className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
-                              title="الرد"
-                            >
-                              <MessageSquare size={15} />
-                            </button>
-                          )}
-                          {canDelete && (
-                            <button
-                              onClick={() => openDelete(req)}
-                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                              title="حذف"
-                            >
-                              <Trash2 size={15} />
-                            </button>
-                          )}
-                        </div>
-                      </td>
+                      {canAct && (
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-1.5">
+                            {canRespond && (
+                              <button
+                                onClick={() => openRespond(req)}
+                                className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
+                                title="الرد"
+                              >
+                                <MessageSquare size={15} />
+                              </button>
+                            )}
+                            {canDelete && (
+                              <button
+                                onClick={() => openDelete(req)}
+                                className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                                title="حذف"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      )}
                     </tr>
                   );
                 })

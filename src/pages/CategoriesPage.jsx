@@ -44,6 +44,7 @@ export default function CategoriesPage() {
   const canCreate = usePermission('complaints.categories.create');
   const canUpdate = usePermission('complaints.categories.update');
   const canDelete = usePermission('complaints.categories.delete');
+  const canAct = canUpdate || canDelete;
 
   const isEdit = Boolean(selected && !deleteOpen);
 
@@ -135,7 +136,7 @@ export default function CategoriesPage() {
               <th className="px-4 py-3 text-start font-medium">الاسم بالإنجليزية</th>
               <th className="px-4 py-3 text-start font-medium">الوصف</th>
               <th className="px-4 py-3 text-start font-medium">الحالة</th>
-              <th className="px-4 py-3 text-start font-medium">الإجراءات</th>
+              {canAct && <th className="px-4 py-3 text-start font-medium">الإجراءات</th>}
             </tr>
           </thead>
           <tbody>
@@ -143,7 +144,7 @@ export default function CategoriesPage() {
               Array.from({ length: 3 }).map((_, i) => <SkeletonRow key={i} />)
             ) : categories.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-16 text-center text-[#60706d]">
+                <td colSpan={canAct ? 6 : 5} className="px-4 py-16 text-center text-[#60706d]">
                   <FolderOpen size={40} className="mx-auto mb-2 opacity-30" />
                   لا توجد فئات بعد
                 </td>
@@ -161,28 +162,30 @@ export default function CategoriesPage() {
                       : <Badge variant="danger">معطلة</Badge>
                     }
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      {canUpdate && (
-                        <button
-                          onClick={() => openEdit(cat)}
-                          className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
-                          title="تعديل"
-                        >
-                          <Pencil size={15} />
-                        </button>
-                      )}
-                      {canDelete && (
-                        <button
-                          onClick={() => openDelete(cat)}
-                          className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
-                          title="حذف"
-                        >
-                          <Trash2 size={15} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                  {canAct && (
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {canUpdate && (
+                          <button
+                            onClick={() => openEdit(cat)}
+                            className="p-1.5 rounded-lg text-[#0b5248] hover:bg-[#0b5248]/10 transition-colors"
+                            title="تعديل"
+                          >
+                            <Pencil size={15} />
+                          </button>
+                        )}
+                        {canDelete && (
+                          <button
+                            onClick={() => openDelete(cat)}
+                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors"
+                            title="حذف"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
