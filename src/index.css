@@ -1,0 +1,28 @@
+@import "@fontsource-variable/noto-kufi-arabic";
+
+@import "tailwindcss";
+
+@theme {
+  --color-primary:        #0b5248;
+  --color-primary-dark:   #083a33;
+  --color-accent:         #d6b86f;
+  --color-surface:        rgba(255,255,255,0.82);
+  --color-surface-strong: #ffffff;
+  --color-border-soft:    rgba(11,63,56,0.10);
+  --color-text-muted:     #60706d;
+  --shadow-card: 0 16px 30px rgba(11,63,56,0.08);
+  --shadow-soft: 0 20px 45px rgba(15,23,42,0.08);
+  --font-sans: "Noto Kufi Arabic Variable", sans-serif;
+}
+
+* {
+  font-family: "Noto Kufi Arabic Variable", sans-serif;
+  direction: rtl;
+}
+
+body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(214,184,111,0.16), transparent 24%),
+    linear-gradient(180deg, #f7f5ef 0%, #edf3ef 100%);
+  min-height: 100vh;
+}
