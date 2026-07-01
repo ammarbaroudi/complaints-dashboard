@@ -47,7 +47,7 @@ const useAuthStore = create(
     }),
     {
       name: 'complaints-auth',
-      partialize: (s) => ({ token: s.token, refreshToken: s.refreshToken }),
+      partialize: (s) => ({ token: s.token, refreshToken: s.refreshToken, permissions: s.permissions }),
     }
   )
 );

@@ -4,13 +4,14 @@ const BASE_URL = 'https://complaints-nest.onrender.com';
 
 const api = axios.create({ baseURL: BASE_URL });
 
-api.interceptors.request.use((config) => {
-  const raw = localStorage.getItem('complaints-auth');
-  if (raw) {
-    const parsed = JSON.parse(raw);
-    const token = parsed?.state?.token ?? parsed?.token;
-    if (token) config.headers.Authorization = `Bearer ${token}`;
-  }
+function getStore() {
+  return import('../store/authStore').then((m) => m.default);
+}
+
+api.interceptors.request.use(async (config) => {
+  const store = await getStore();
+  const token = store.getState().token;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
@@ -32,12 +33,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401 && !isLoginRequest && !isRefreshRequest && !original._retry) {
       original._retry = true;
 
-      const raw = localStorage.getItem('complaints-auth');
-      const parsed = raw ? JSON.parse(raw) : {};
-      const refreshToken = parsed?.state?.refreshToken ?? parsed?.refreshToken;
+      const store = await getStore();
+      const refreshToken = store.getState().refreshToken;
 
       if (!refreshToken) {
-        localStorage.removeItem('complaints-auth');
+        store.getState().logout();
         window.location.href = '/login';
         return Promise.reject(error);
       }
@@ -57,25 +57,17 @@ api.interceptors.response.use(
         const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refresh_token: refreshToken });
         const newToken = data.access_token;
 
-        // zustand/persist يخزن البيانات داخل { state: { token, refreshToken } }
-        const stored = JSON.parse(localStorage.getItem('complaints-auth') || '{}');
-        if (!stored.state) stored.state = {};
-        stored.state.token = newToken;
-        if (data.refresh_token) stored.state.refreshToken = data.refresh_token;
-        localStorage.setItem('complaints-auth', JSON.stringify(stored));
-
-        if (data.permissions) {
-          const { default: useAuthStore } = await import('../store/authStore');
-          const perms = data.permissions.map((p) => p.name ?? p);
-          useAuthStore.setState({ permissions: perms });
-        }
+        const update = { token: newToken };
+        if (data.refresh_token) update.refreshToken = data.refresh_token;
+        if (data.permissions) update.permissions = data.permissions.map((p) => p.name ?? p);
+        store.setState(update);
 
         original.headers.Authorization = `Bearer ${newToken}`;
         processQueue(null, newToken);
         return api(original);
       } catch (refreshError) {
         processQueue(refreshError, null);
-        localStorage.removeItem('complaints-auth');
+        store.getState().logout();
         window.location.href = '/login';
         return Promise.reject(refreshError);
       } finally {
